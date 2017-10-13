@@ -30,6 +30,8 @@ New contributors are welcome!  If you're interested or have ideas, please contac
 
 Version 0.1.0 – initial release on GitHub
 
+Version 0.1.1 – minor updates to handle current versions of Samtools and SPAdes.
+
 ## License
 
 GNU General Public License, version 3
