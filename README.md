@@ -11,6 +11,13 @@ Each iteration generates the following:
 
 Ideally, the iteration will grow with each iteration. The resulting assembly graph can then be analysed using Bandage.
 
+## Requirements
+
+* [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml)
+* [Samtools](https://samtools.github.io/)
+* [Bedtools](http://bedtools.readthedocs.io/)
+* An assembler, e.g. [SPAdes](http://cab.spbu.ru/software/spades/)
+
 ## Installation
 
 No compilation or installation is required - just download/clone and run Irsat.py.

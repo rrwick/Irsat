@@ -307,8 +307,7 @@ def mapPairedReads(iteration, iterDir):
 
     # Prepare file paths
     index = iterDir + '/1_mapping_index/bowtie2index'
-    unfilteredBam1 = pairedDir + '/alignments'
-    unfilteredBam2 = unfilteredBam1 + '.bam'
+    unfilteredBam = pairedDir + '/alignments.bam'
     bothBam = pairedDir + '/both.bam'
     justReadBam = pairedDir + '/just_read.bam'
     justMateBam = pairedDir + '/just_mate.bam'
@@ -322,31 +321,27 @@ def mapPairedReads(iteration, iterDir):
     bowtie2Command = replacePartOfCommand(bowtie2Command, 'PAIRED_READS_FILE_1', args['1'])
     bowtie2Command = replacePartOfCommand(bowtie2Command, 'PAIRED_READS_FILE_2', args['2'])
 
-    # Use samtools view to compress the sam file to a bam
-    samtools_viewCommand = ['samtools', 'view', '-Shu', '-']
-
-    # Use samtools sort to sort the bam file
-    samtools_sortCommand = ['samtools', 'sort', '-n', '-', unfilteredBam1]
+    # Use samtools sort to make a sorted bam of the alignments
+    samtools_sortCommand = ['samtools', 'sort', '-n', '-o', unfilteredBam, '-']
 
     # Run the commands!
     bowtie2 = subprocess.Popen(bowtie2Command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    samtools_view = subprocess.Popen(samtools_viewCommand, stdin=bowtie2.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    samtools_sort = subprocess.Popen(samtools_sortCommand, stdin=samtools_view.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    samtools_sort = subprocess.Popen(samtools_sortCommand, stdin=bowtie2.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     samtools_sort.communicate()
 
     # Use samtools view to produce three separate files:
     #  -reads containing neither 4 nor 8 (read and mate mapped)
     #  -reads containing 8 but not 4 (read mapped, mate didn't)
     #  -reads containing 4 but not 8 (mate mapped, read didn't)
-    samtools_viewCommandBoth = ['samtools', 'view', '-u', '-F', '12', '-o', bothBam, unfilteredBam2]
+    samtools_viewCommandBoth = ['samtools', 'view', '-u', '-F', '12', '-o', bothBam, unfilteredBam]
     samtools_viewBoth = subprocess.Popen(samtools_viewCommandBoth, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     samtools_viewBoth.communicate()
 
-    samtools_viewCommandJustRead = ['samtools', 'view', '-u', '-f', '8', '-F', '4', '-o', justReadBam, unfilteredBam2]
+    samtools_viewCommandJustRead = ['samtools', 'view', '-u', '-f', '8', '-F', '4', '-o', justReadBam, unfilteredBam]
     samtools_viewJustRead = subprocess.Popen(samtools_viewCommandJustRead, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     samtools_viewJustRead.communicate()
 
-    samtools_viewCommandJustMate = ['samtools', 'view', '-u', '-f', '4', '-F', '8', '-o', justMateBam, unfilteredBam2]
+    samtools_viewCommandJustMate = ['samtools', 'view', '-u', '-f', '4', '-F', '8', '-o', justMateBam, unfilteredBam]
     samtools_viewJustMate = subprocess.Popen(samtools_viewCommandJustMate, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     samtools_viewJustMate.communicate()
 
@@ -385,8 +380,7 @@ def mapUnpairedReads(iteration, iterDir):
 
     # Prepare file paths
     index = iterDir + '/1_mapping_index/bowtie2index'
-    unfilteredBam1 = unpairedDir + '/alignments'
-    unfilteredBam2 = unfilteredBam1 + '.bam'
+    unfilteredBam = unpairedDir + '/alignments.bam'
     filteredBam = unpairedDir + '/filtered.bam'
     filteredReads = iterDir + '/filtered_reads_U.fastq'
 
@@ -395,20 +389,16 @@ def mapUnpairedReads(iteration, iterDir):
     bowtie2Command = replacePartOfCommand(bowtie2Command, 'INDEX', index)
     bowtie2Command = replacePartOfCommand(bowtie2Command, 'UNPAIRED_READS_FILE', args['u'])
 
-    # Use samtools view to compress the sam file to a bam
-    samtools_viewCommand = ['samtools', 'view', '-Shu', '-']
-
-    # Use samtools sort to sort the bam file
-    samtools_sortCommand = ['samtools', 'sort', '-n', '-', unfilteredBam1]
+    # Use samtools sort to make a sorted bam of the alignments
+    samtools_sortCommand = ['samtools', 'sort', '-n', '-o', unfilteredBam, '-']
 
     # Run the commands!
     bowtie2 = subprocess.Popen(bowtie2Command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    samtools_view = subprocess.Popen(samtools_viewCommand, stdin=bowtie2.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    samtools_sort = subprocess.Popen(samtools_sortCommand, stdin=samtools_view.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    samtools_sort = subprocess.Popen(samtools_sortCommand, stdin=bowtie2.stdout, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     samtools_sort.communicate()
 
     # Use samtools view to filter out reads that didn't align
-    samtools_viewCommand = ['samtools', 'view', '-u', '-F', '4', '-o', filteredBam, unfilteredBam2]
+    samtools_viewCommand = ['samtools', 'view', '-u', '-F', '4', '-o', filteredBam, unfilteredBam]
     samtools_view = subprocess.Popen(samtools_viewCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     samtools_view.communicate()
 
